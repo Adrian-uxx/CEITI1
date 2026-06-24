@@ -1,0 +1,227 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace BibliotecaApp
+{
+    public partial class Form1 : Form
+    {
+        private string connectionString = "Server=desktop-1bq40ct;Database=BibliotecaDB;Trusted_Connection=True;";
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void RefreshTabel()
+        {
+            string tabel = cmbTabele.Text;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                SqlDataAdapter da = new SqlDataAdapter("SELECT * FROM " + tabel, conn);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                dgvDate.DataSource = dt;
+            }
+        }
+
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            cmbTabele.Items.Add("Autor");
+            cmbTabele.Items.Add("Editura");
+            cmbTabele.Items.Add("Cititor");
+            cmbTabele.Items.Add("Carte");
+            cmbTabele.Items.Add("Imprumut");
+
+            cmbTabele.SelectedIndex = 0;
+        }
+
+        private void tabVizualizare_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void btnAfiseaza_Click(object sender, EventArgs e)
+        {
+            string tabel = cmbTabele.Text;
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "SELECT * FROM " + tabel;
+
+                SqlDataAdapter da = new SqlDataAdapter(query, conn);
+                DataTable dt = new DataTable();
+
+                da.Fill(dt);
+
+                dgvDate.DataSource = dt;
+            }
+        }
+        //adaugare autor
+        private void btnAdaugaAutor_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_AdaugaAutor", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@nume", txtNume.Text);
+                cmd.Parameters.AddWithValue("@prenume", txtPrenume.Text);
+                cmd.Parameters.AddWithValue("@tara", txtTara.Text);
+                cmd.Parameters.AddWithValue("@data_nasterii", dtpDataNasterii.Value);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Autor adaugat cu succes!");
+                RefreshTabel();
+            }
+        }
+        // stergere autor
+        private void btnStergeAutor_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "DELETE FROM Autor WHERE id_autor = @id";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id", txtIdAutor.Text);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Autor sters cu succes!");
+            }
+        }
+        // actualizare autor
+        private void btnUpdateAutor_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"UPDATE Autor
+                         SET nume = @nume,
+                             prenume = @prenume,
+                             tara = @tara,
+                             data_nasterii = @data
+                         WHERE id_autor = @id";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+
+                cmd.Parameters.AddWithValue("@id", int.Parse(txtIdAutor.Text));
+                cmd.Parameters.AddWithValue("@nume", txtNume.Text);
+                cmd.Parameters.AddWithValue("@prenume", txtPrenume.Text);
+                cmd.Parameters.AddWithValue("@tara", txtTara.Text);
+                cmd.Parameters.AddWithValue("@data", dtpDataNasterii.Value);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Autor actualizat cu succes!");
+                RefreshTabel();
+            }
+        }
+
+        private void dgvDate_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            DataGridViewRow row = dgvDate.Rows[e.RowIndex];
+            string tabel = cmbTabele.Text;
+            if (tabel == "Autor")
+            {
+                txtIdAutor.Text = row.Cells["id_autor"].Value?.ToString();
+                txtNume.Text = row.Cells["nume"].Value?.ToString();
+                txtPrenume.Text = row.Cells["prenume"].Value?.ToString();
+                txtTara.Text = row.Cells["tara"].Value?.ToString();
+
+                if (row.Cells["data_nasterii"].Value != DBNull.Value)
+                    dtpDataNasterii.Value = Convert.ToDateTime(row.Cells["data_nasterii"].Value);
+            }
+            else if (tabel == "Editura")
+            {
+                txtIdEditura.Text = row.Cells["id_editura"].Value?.ToString();
+                txtDenumireEditura.Text = row.Cells["denumire"].Value?.ToString();
+                txtTaraEditura.Text = row.Cells["tara"].Value?.ToString();
+                txtAdresaEditura.Text = row.Cells["adresa"].Value?.ToString();
+                txtTelefonEditura.Text = row.Cells["telefon"].Value?.ToString();
+            }
+        }
+
+        private void btnAdaugareEditura_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                SqlCommand cmd = new SqlCommand("sp_AdaugaEditura", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@denumire", txtDenumireEditura.Text);
+                cmd.Parameters.AddWithValue("@tara", txtTaraEditura.Text);
+                cmd.Parameters.AddWithValue("@adresa", txtAdresaEditura.Text);
+                cmd.Parameters.AddWithValue("@telefon", txtTelefonEditura.Text);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Editura adaugata cu succes!");
+                RefreshTabel();
+            }
+        }
+
+        private void btnUpdateEditura_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = @"UPDATE Editura
+                         SET denumire = @denumire,
+                             tara = @tara,
+                             adresa = @adresa,
+                             telefon = @telefon
+                         WHERE id_editura = @id";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id", int.Parse(txtIdEditura.Text));
+                cmd.Parameters.AddWithValue("@denumire", txtDenumireEditura.Text);
+                cmd.Parameters.AddWithValue("@tara", txtTaraEditura.Text);
+                cmd.Parameters.AddWithValue("@adresa", txtAdresaEditura.Text);
+                cmd.Parameters.AddWithValue("@telefon", txtTelefonEditura.Text);
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Editura actualizata cu succes!");
+                RefreshTabel();
+            }
+        }
+
+        private void btnStergeEditura_Click(object sender, EventArgs e)
+        {
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                string query = "DELETE FROM Editura WHERE id_editura = @id";
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@id", int.Parse(txtIdEditura.Text));
+
+                conn.Open();
+                cmd.ExecuteNonQuery();
+                conn.Close();
+
+                MessageBox.Show("Editura stersa cu succes!");
+                RefreshTabel();
+            }
+        }
+    }
+}
