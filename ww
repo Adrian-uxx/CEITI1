@@ -1,0 +1,63 @@
+Formularul principal (FrmBiblioteca)
+
+Setează:
+
+Name: FrmBiblioteca
+Text: Gestionare Biblioteca
+StartPosition: CenterScreen
+Adaugă un TabControl
+
+Din Toolbox trage un TabControl pe formular.
+
+Setează:
+
+Name: tabControl1
+Dock: Fill
+
+Creează 2 pagini:
+
+TabPage 1
+Name: tabVizualizare
+Text: Vizualizare Date
+TabPage 2
+Name: tabOperatii
+Text: Operatii SQL
+TAB 1 - Vizualizare Date
+
+Pe primul tab adaugă:
+
+Label
+Tabel:
+
+Proprietăți:
+
+Name = lblTabel
+Text = Tabel:
+ComboBox
+Name = cmbTabele
+
+Proprietăți:
+
+DropDownStyle = DropDownList
+Button
+Name = btnAfiseaza
+Text = Afiseaza
+DataGridView
+Name = dgvDate
+
+Proprietăți:
+
+Dock = Bottom
+Height = 350
+AutoSizeColumnsMode = Fill
+
+Aspectul va fi:
+
+-------------------------------------------------
+| Tabel: [Autor ▼]       [Afiseaza]             |
+-------------------------------------------------
+|                                               |
+|                                               |
+|              DataGridView                     |
+|                                               |
+-------------------------------------------------
